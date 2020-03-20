@@ -5,12 +5,13 @@ clear
 warning('off','map:geodesic:longGeodesic'); 
 
 % Configuration
+save_video = false;
 planet = referenceEllipsoid('earth','m');
-num_people = 50000;
+num_people = 25000;
 marksize = 1;
 marksize_infected = 30;
-marksize_immune = 1;
-stepsperday = 5;
+marksize_immune = 5;
+stepsperday = 1;
 
 % Initialize map
 load coastlines
@@ -48,6 +49,12 @@ infected = plot(LONG(Infected),LAT(Infected),'r.','markersize', marksize_infecte
 immune = plot(LONG(Immune),LAT(Immune),'b.','markersize', marksize_immune);
 set(gcf,'units','normalized','outerposition',[0 0 1 1])
 
+% Initialize video
+if save_video
+    vid1 = VideoWriter('Pandemic.mp4','MPEG-4');
+    open(vid1);
+end
+
 for t = 1:365
     % Determine daily travel
     Direction = 360 .* rand(1,num_people);
@@ -76,7 +83,7 @@ for t = 1:365
         if DaysInfected(n) > 5 && DaysInfected(n) < 10
             Mobility(n) = 0;            
         else
-            Mobility(n) = lognrnd(8,3);
+            Mobility(n) = lognrnd(7.5,2.5);
         end
     end
     Step = Mobility./stepsperday;
@@ -87,7 +94,7 @@ for t = 1:365
         [LAT, LONG] = reckon(LAT, LONG, Step, Direction, planet);
 
         % Infect nearby individuals
-        Idx = rangesearch([LAT' LONG'], [LAT' LONG'], 0.3);
+        Idx = rangesearch([LAT' LONG'], [LAT' LONG'], 1);
         for n = 1:num_people
             if Contagious(n)
                 for nearby = 1:size(Idx{n},2)
@@ -109,7 +116,14 @@ for t = 1:365
         immune.YData = LAT(Immune);
         immune.XData = LONG(Immune);
         drawnow
+        if save_video
+            writeVideo(vid1,getframe(gcf));
+        end
     end
+end
+
+if save_video
+    close(vid1)
 end
 
 warning('on','map:geodesic:longGeodesic'); 
