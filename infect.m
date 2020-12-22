@@ -5,9 +5,9 @@ clear
 warning('off','map:geodesic:longGeodesic'); 
 
 % Configuration
-save_video = true;
+save_video = false;
 planet = referenceEllipsoid('earth','m');
-num_people = 500000;
+num_people = 50000;
 marksize = 1;
 marksize_infected = 5;
 marksize_immune = 3;
@@ -92,7 +92,7 @@ for t = 1:365
         [LAT, LONG] = reckon(LAT, LONG, Step, Direction, planet);
 
         % Infect nearby individuals
-        Idx = rangesearch([LAT' LONG'], [LAT' LONG'],  0.1);
+        Idx = rangesearch([LAT' LONG'], [LAT' LONG'],  0.5);
         for n = 1:num_people
             if (Contagious(n)) && (Mobility(n) < airtravel_dist)
                 for nearby = 1:size(Idx{n},2)
